@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wordmaker — Markdown to .docx &amp; .pdf</title>
+    <meta
+      name="description"
+      content="Paste Markdown and export a beautifully formatted Word or PDF document. Local-first, private, cross-platform."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2318181b'/%3E%3Cpath d='M7 22V10h3l3 6 3-6h3v12h-3v-7l-2.4 5h-1.2L13 15v7H7zm17 0l-4-6h2.6V10h2.8v6H28l-4 6z' fill='white'/%3E%3C/svg%3E" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <meta name="theme-color" content="#fafafa" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- ───────────────────────── Top bar ───────────────────────── -->
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="22" height="22">
+              <path d="M7 22V10h3l3 6 3-6h3v12h-3v-7l-2.4 5h-1.2L13 15v7H7z" fill="currentColor" />
+              <path d="M24 22l-4-6h2.6V10h2.8v6H28l-4 6z" fill="currentColor" />
+            </svg>
+          </div>
+          <div class="brand__text">
+            <span class="brand__name">Wordmaker</span>
+            <span class="brand__tag">Markdown → polished document</span>
+          </div>
+        </div>
+
+        <div class="topbar__actions">
+          <label class="field field--inline">
+            <span class="field__label">Style</span>
+            <select id="preset" class="select"></select>
+          </label>
+          <div class="divider" aria-hidden="true"></div>
+          <button id="exportDocx" class="btn btn--ghost" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2 4 4h-4V4ZM8 13h8v1.5H8V13Zm0 3h8v1.5H8V16Z"/></svg>
+            Word
+          </button>
+          <button id="exportPdf" class="btn btn--solid" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2 4 4h-4V4ZM9 12h1.5a1.75 1.75 0 0 1 0 3.5H10V18H9v-6Zm1 2.5a.25.25 0 0 0 0-.5H10v.5h0Zm3.5-2.5H15a2 2 0 0 1 0 4h-1.5v-4Zm1 3a.5.5 0 0 0 0-1h-.5v1h.5Z"/></svg>
+            PDF
+          </button>
+        </div>
+      </header>
+
+      <!-- ──────────────────────── Workspace ──────────────────────── -->
+      <main class="workspace">
+        <!-- Settings rail -->
+        <aside class="rail" id="rail">
+          <div class="rail__group">
+            <h2 class="rail__title">Typeface</h2>
+            <label class="field">
+              <span class="field__label">Font</span>
+              <select id="font" class="select"></select>
+            </label>
+          </div>
+
+          <div class="rail__group">
+            <h2 class="rail__title">Sizing</h2>
+            <label class="field field--slider">
+              <span class="field__label">Body size <output id="bodySizeVal" class="field__val"></output></span>
+              <input id="bodySize" class="slider" type="range" min="8" max="18" step="0.5" />
+            </label>
+            <label class="field field--slider">
+              <span class="field__label">Title size <output id="titleSizeVal" class="field__val"></output></span>
+              <input id="titleSize" class="slider" type="range" min="14" max="48" step="1" />
+            </label>
+          </div>
+
+          <div class="rail__group">
+            <h2 class="rail__title">Spacing</h2>
+            <label class="field field--slider">
+              <span class="field__label">Line height <output id="lineHeightVal" class="field__val"></output></span>
+              <input id="lineHeight" class="slider" type="range" min="1" max="2.2" step="0.05" />
+            </label>
+            <label class="field field--slider">
+              <span class="field__label">Paragraph gap <output id="paraSpacingVal" class="field__val"></output></span>
+              <input id="paraSpacing" class="slider" type="range" min="0" max="2" step="0.05" />
+            </label>
+          </div>
+
+          <div class="rail__group">
+            <h2 class="rail__title">Page</h2>
+            <label class="field field--slider">
+              <span class="field__label">Margins <output id="marginVal" class="field__val"></output></span>
+              <input id="margin" class="slider" type="range" min="0.4" max="1.5" step="0.05" />
+            </label>
+            <label class="field">
+              <span class="field__label">Paper</span>
+              <select id="pageSize" class="select">
+                <option value="letter">Letter · 8.5 × 11 in</option>
+                <option value="a4">A4 · 210 × 297 mm</option>
+              </select>
+            </label>
+          </div>
+
+          <button id="reset" class="btn btn--quiet" type="button">Reset to style defaults</button>
+        </aside>
+
+        <!-- Editor -->
+        <section class="editor">
+          <div class="panel-bar">
+            <span class="panel-bar__title">Markdown</span>
+            <div class="panel-bar__right">
+              <button id="loadSample" class="link" type="button">Load sample</button>
+              <button id="clear" class="link" type="button">Clear</button>
+              <span class="counter" id="wordCount">0 words</span>
+            </div>
+          </div>
+          <textarea
+            id="editor"
+            class="editor__input"
+            spellcheck="false"
+            placeholder="Paste or write Markdown here…"
+          ></textarea>
+        </section>
+
+        <!-- Preview -->
+        <section class="preview">
+          <div class="panel-bar">
+            <span class="panel-bar__title">Preview</span>
+            <span class="panel-bar__hint" id="pageHint"></span>
+          </div>
+          <div class="preview__scroll">
+            <article id="paper" class="paper"></article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Footer credit printed at the bottom-left of every exported PDF page. -->
+    <a
+      class="pdf-footer"
+      id="pdfFooter"
+      href="https://github.com/christianptc/wordmaker"
+      >github.com/christianptc/wordmaker</a
+    >
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
