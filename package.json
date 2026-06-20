@@ -8,11 +8,13 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 4173",
-    "test": "tsx test/docx.test.ts",
+    "test": "tsx test/docx.test.ts && tsx test/pdf.test.ts",
+    "test:pdf": "tsx test/pdf.test.ts",
     "shots": "node scripts/shots.mjs"
   },
   "dependencies": {
     "docx": "^9.0.0",
+    "jspdf": "^4.2.1",
     "marked": "^12.0.0"
   },
   "devDependencies": {

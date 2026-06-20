@@ -3,14 +3,18 @@ import {
   BorderStyle,
   Document,
   ExternalHyperlink,
+  Footer,
+  Header,
   LevelFormat,
   LineRuleType,
   Packer,
+  PageNumber,
   Paragraph,
   ShadingType,
   Table,
   TableCell,
   TableRow,
+  TabStopType,
   TextRun,
   WidthType,
   convertInchesToTwip,
@@ -20,6 +24,7 @@ import {
 import { fontById } from "./presets";
 import { headingSizes } from "./typography";
 import { lex } from "./markdown";
+import { documentTitle } from "./doc-title";
 import type { Settings } from "./types";
 
 // ── unit helpers ────────────────────────────────────────────────────────────
@@ -375,6 +380,8 @@ export function buildDocument(md: string, settings: Settings): Document {
         margin: { top: m, right: m, bottom: m, left: m },
       },
     },
+    headers: buildHeader(md, settings, font, st.bodyHalf),
+    footers: buildFooter(settings, font, st.bodyHalf),
     children: children.length ? children : [new Paragraph({ children: [] })],
   };
 
@@ -411,20 +418,75 @@ export function buildDocument(md: string, settings: Settings): Document {
   });
 }
 
-// ── browser-only: build, pack, download ──────────────────────────────────────
-export async function exportDocx(md: string, settings: Settings, filename = "document.docx") {
-  const doc = buildDocument(md, settings);
-  const blob = await Packer.toBlob(doc);
-  triggerDownload(blob, filename.endsWith(".docx") ? filename : `${filename}.docx`);
+// ── running header / footer (mirrors the PDF options) ────────────────────────
+function buildHeader(md: string, settings: Settings, font: string, bodyHalf: number) {
+  if (!settings.showHeader) return undefined;
+  const title = documentTitle(md);
+  return {
+    default: new Header({
+      children: [
+        new Paragraph({
+          alignment: AlignmentType.CENTER,
+          children: [
+            new TextRun({ text: title, font, size: Math.round(bodyHalf * 0.85), color: "71717A" }),
+          ],
+          border: {
+            bottom: { style: BorderStyle.SINGLE, size: 4, color: "E4E4E7", space: 4 },
+          },
+        }),
+      ],
+    }),
+  };
 }
 
-function triggerDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+function buildFooter(settings: Settings, font: string, bodyHalf: number) {
+  if (!settings.showFooter && !settings.showPageNumbers) return undefined;
+
+  const pageWidth = settings.pageSize === "a4" ? 8.27 : 8.5;
+  const rightTab = convertInchesToTwip(pageWidth - 2 * settings.margin);
+  const size = Math.round(bodyHalf * 0.82);
+  const children: (TextRun | ExternalHyperlink)[] = [];
+
+  const ft = settings.footerText.trim();
+  if (settings.showFooter && ft) {
+    if (/(github\.com|https?:\/\/|\.\w{2,})/.test(ft)) {
+      const url = /^https?:\/\//.test(ft) ? ft : `https://${ft.replace(/^\/+/, "")}`;
+      children.push(
+        new ExternalHyperlink({
+          link: url,
+          children: [new TextRun({ text: ft, font, size, color: "71717A" })],
+        })
+      );
+    } else {
+      children.push(new TextRun({ text: ft, font, size, color: "71717A" }));
+    }
+  }
+
+  if (settings.showPageNumbers) {
+    children.push(new TextRun({ text: "\t", font, size }));
+    children.push(
+      new TextRun({
+        children: ["Page ", PageNumber.CURRENT, " / ", PageNumber.TOTAL_PAGES],
+        font,
+        size,
+        color: "71717A",
+      })
+    );
+  }
+
+  return {
+    default: new Footer({
+      children: [
+        new Paragraph({
+          tabStops: [{ type: TabStopType.RIGHT, position: rightTab }],
+          children,
+        }),
+      ],
+    }),
+  };
+}
+
+// ── browser-only: build, pack to a Blob ──────────────────────────────────────
+export async function buildDocumentBlob(md: string, settings: Settings): Promise<Blob> {
+  return Packer.toBlob(buildDocument(md, settings));
 }

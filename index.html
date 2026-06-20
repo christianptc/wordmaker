@@ -36,6 +36,13 @@
           </div>
         </div>
 
+        <nav class="viewnav" id="viewnav">
+          <button class="viewnav__btn is-active" data-view="editor" type="button">Editor</button>
+          <button class="viewnav__btn" data-view="history" type="button">
+            History <span class="viewnav__count" id="historyCount" hidden>0</span>
+          </button>
+        </nav>
+
         <div class="topbar__actions">
           <label class="field field--inline">
             <span class="field__label">Style</span>
@@ -53,8 +60,10 @@
         </div>
       </header>
 
-      <!-- ──────────────────────── Workspace ──────────────────────── -->
-      <main class="workspace">
+      <!-- ──────────────────────── Stage ──────────────────────── -->
+      <div class="stage">
+      <!-- Workspace -->
+      <main class="workspace" id="workspace">
         <!-- Settings rail -->
         <aside class="rail" id="rail">
           <div class="rail__group">
@@ -104,6 +113,34 @@
             </label>
           </div>
 
+          <div class="rail__group">
+            <h2 class="rail__title">Output</h2>
+            <label class="toggle">
+              <input id="paginate" type="checkbox" />
+              <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              <span class="toggle__label">Split into pages<small>off = one continuous page</small></span>
+            </label>
+            <label class="toggle">
+              <input id="showHeader" type="checkbox" />
+              <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              <span class="toggle__label">Page header<small>centered document title</small></span>
+            </label>
+            <label class="toggle">
+              <input id="showFooter" type="checkbox" />
+              <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              <span class="toggle__label">Page footer<small>the text below</small></span>
+            </label>
+            <label class="toggle">
+              <input id="showPageNumbers" type="checkbox" />
+              <span class="toggle__track"><span class="toggle__thumb"></span></span>
+              <span class="toggle__label">Page numbers<small>“Page x / N” in the footer</small></span>
+            </label>
+            <label class="field">
+              <span class="field__label">Footer text</span>
+              <input id="footerText" class="text-input" type="text" spellcheck="false" placeholder="e.g. github.com/you/project" />
+            </label>
+          </div>
+
           <button id="reset" class="btn btn--quiet" type="button">Reset to style defaults</button>
         </aside>
 
@@ -136,15 +173,11 @@
           </div>
         </section>
       </main>
-    </div>
 
-    <!-- Footer credit printed at the bottom-left of every exported PDF page. -->
-    <a
-      class="pdf-footer"
-      id="pdfFooter"
-      href="https://github.com/christianptc/wordmaker"
-      >github.com/christianptc/wordmaker</a
-    >
+      <!-- History -->
+      <section class="history" id="history" hidden></section>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

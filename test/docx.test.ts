@@ -18,6 +18,11 @@ const settings: Settings = {
   paraSpacing: 0.85,
   margin: 1,
   pageSize: "letter",
+  paginate: true,
+  showHeader: true,
+  showFooter: true,
+  showPageNumbers: true,
+  footerText: "github.com/christianptc/wordmaker",
 };
 
 const cases: Record<string, string> = {
